@@ -1,0 +1,23 @@
+{
+  "name": "numinous-nimbus",
+  "version": "0.0.0",
+  "description": "",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/iankronquist/numinous-nimbus.git"
+  },
+  "author": "Ian Kronquist",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iankronquist/numinous-nimbus/issues"
+  },
+  "dependencies": {
+    "express": "~4.14.0",
+    "forever": "~0.15.2"
+  }
+}
