@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CS290 Assignment 2</title>
+	<meta charset="utf-8"/>
+	<link rel="stylesheet" type="text/css" href="style.css"> 
+</head>
+<body>
+	<!-- Create a table that has that is 6x6 (inclusive of the header row). -->
+	<div>
+	<table>
+	
+		<!-- The table should have a caption detailing the contents of the table. -->
+		<caption>Who wins? Cell content indicates the status of the row entry.</caption>
+		<tbody>
+		<tr>
+			<!-- The upper left cell should be empty. The others should be non-empty. -->
+			<!-- The table should have a header section, all the cells in this section should have bold text. (This is the default for th) -->
+			<th id='column_header'> </th>
+			<th id='column_header'>Godzilla</th>
+			<th id='column_header'>Batman</th>
+			<th id='column_header'>Shaq</th>
+			<th id='column_header'>Aaron Carter</th>
+			<th id='column_header'>Abe Lincoln</th>
+		</tr>
+		<tr class='table_innards'>
+			<td id='row_header'>Godzilla</td>
+			<td>N/A</td>
+			<td>Minor Loss</td>
+			<td>Loss</td>
+			<td>Unknown</td>
+			<td>Unknown</td>
+		</tr>
+		<tr class='table_innards'>
+			<td id='row_header'>Batman</td>
+			<td>Minor Win</td>
+			<td>N/A</td>
+			<td>Total Victory</td>
+			<td>Total Victory</td>
+			<td>Total Loss</td>
+		</tr>
+		<tr class='table_innards'>
+			<td id='row_header'>Shaq</td>
+			<td>Win</td>
+			<td>Total Loss</td>
+			<td>N/A</td>
+			<td>Minor Loss</td>
+			<td>Unknown</td>
+		</tr>
+		<tr class='table_innards'>
+			<td id='row_header'>Aaron Carter</td>
+			<td>Unknown</td>
+			<td>TotalLoss</td>
+			<td>Minor Win</td>
+			<td>N/A</td>
+			<td>Unknown</td>
+		</tr>
+		<tr class='table_innards'>
+			<td id='row_header'>Abe Lincoln</td>
+			<td>Unknown</td>
+			<td>Total Victory</td>
+			<td>Unknown</td>
+			<td>Unknown</td>
+			<td>N/A</td>
+		</tr>
+		</tbody>
+		<!-- The table should have a footer section made up of two cells, one should be 2 columns wide, the other should be 4 columns wide. -->
+		<tfoot>
+			<tr>
+				<td colspan='2'>Footer 1</td>
+				<td colspan='4'>Footer 2</td>
+			</tr>
+		</tfoot>
+	</table>
+	</div>
+	<!-- Create a list (ul, ol or dl) with at least 3 entries. -->
+	<ul>
+		Best Language
+		<li>Python</li>
+		Wackyist language
+		<li>Haskell</li>
+		SEGFUALTiest language
+		<li>C</li>
+	</ul>
+	<div class='outer-content'>
+		<div class='inner-content'>
+			Here is some content.
+		</div>
+	</div>
+	<!-- Create two forms. One should submit via a post, the other via a get, they should have identical content. -->
+	<!-- They should submit to http://classes.engr.oregonstate.edu/eecs/winter2015/cs290-400/tools/class-content/form_tests/check_request.php to better facilitate testing. -->
+	<form method='GET' action='http://classes.engr.oregonstate.edu/eecs/winter2015/cs290-400/tools/class-content/form_tests/check_request.php'>
+		<fieldset>
+		<!-- There should be 4 input types  -->
+			<legend>Some Get Data</legend>
+		<fieldset>
+			<!-- A text input with a name attribute of 'text_input' -->
+			Text here:
+			<input id="text" type="text" name='text_input' >
+		</fieldset>
+		<fieldset>
+			<!-- A number input with a name attribute of 'numerical_input' -->
+			Number here:
+			<input id="text" type="number" name='numerical_input'>
+		</fieldset>
+		<fieldset>
+			<!-- A password input with a name attribute of 'password_input' -->
+			Password here:
+			<input id="text" type="password" name='password_input'>
+		</fieldset>
+		<fieldset>
+			<!-- A set of radio inputs  -->
+			<!-- They should be named 'candy' -->
+			<legend>Select between:</legend>
+			<!-- These options should exist in this order:
+				- Snickers
+				- Skittles
+				- Mentos
+			-->
+			<input type="radio" id="radio" name='candy' value='Snickers'>Snickers<br>
+			<input type="radio" id="radio" name='candy' value='Skittles'>Skittles<br>
+			<input type="radio" id="radio" name='candy' value='Mentos'>Mentos<br>
+			<input type="submit">
+		</fieldset>
+		</fieldset>
+	</form>
+	<form method='POST' action='http://classes.engr.oregonstate.edu/eecs/winter2015/cs290-400/tools/class-content/form_tests/check_request.php'>
+		<fieldset>
+			<legend>Some Post Data</legend>
+		<fieldset>
+			Text here:
+			<input id="text" type="text" name='text_input' >
+		</fieldset>
+		<fieldset>
+			Number here:
+			<input id="text" type="number" name='numerical_input'>
+		</fieldset>
+		<fieldset>
+			Password here:
+			<input id="text" type="password" name='password_input'>
+		</fieldset>
+		<fieldset>
+			<legend>Select between:</legend>
+			<input type="radio" id="radio" name='candy' value='Snickers'>Snickers<br>
+			<input type="radio" id="radio" name='candy' value='Skittles'>Skittles<br>
+			<input type="radio" id="radio" name='candy' value='Mentos'>Mentos<br>
+			<input type="submit">
+		</fieldset>
+		</fieldset>
+	</form>
+
+</body>

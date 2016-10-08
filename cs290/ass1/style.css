@@ -1,0 +1,39 @@
+table, th, td {
+	border: 1px solid black;
+}
+
+/* The first column of the table should have header cells that have italic text. (These should not be bold) */
+#row_header {
+	font-style: italic;
+}
+
+/* Create a div that is aligned to the left side of the page and takes up 3/4 of the page width, has a space of 20px between it and the previous element and has a class of 'outer-content'.
+  - Its background should be pink.
+ */
+.outer-content {
+	left: 0px;
+	width: 75%;
+	padding: 20px;
+	background-color: pink;
+	text-align: center;
+}
+
+/* Inside that div have another div called 'inner-content'.
+   - Its background should be blue.
+   - It should take up 3/4 of the parent divs width and should be centered.
+*/
+.inner-content {
+	background-color: LightBlue;
+	margin: auto;
+	text-align: center;
+	width: 75%;
+}
+
+/* Make the non-header rows alternate colors. To accomplish this you will need to use a pseudo-class called :nth-of-type() */
+.table_innards:nth-of-type(2n){
+	background-color: LightGreen;
+}
+
+.table_innards:nth-of-type(2n+1){
+	background-color: LightBlue;
+}
