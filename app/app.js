@@ -41,12 +41,10 @@ app.post('/', function (req, res) {
 });
 
 app.post('/update', function (req, res) {
-  console.log('-------------------- post\n', req.body);
   return updatePackage(app, res, req.body);
 });
 
 app.post('/create', function (req, res) {
-  console.log('post');
   return createPackage(app, res, req.body);
 });
 
