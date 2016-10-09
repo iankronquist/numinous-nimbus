@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>How Do I Install A Package?</title>
+        <meta charset='utf-8'/>
+        <link rel='stylesheet' type='text/css' href='/style.css'> 
+    </head>
+    <body>
+        <h1>How to install {{package_name}}</h1>
+        {% for package in packages %}
+            <p>{{package.name}}</p>
+            <p>
+            {{package.install_command}}
+            </p>
+            <p>
+            {% if package.website %}
+            Website:
+            {{package.website}}<br>
+            {% endif %}
+            </p>
+            <p>
+            {% if package.last_release %}
+            Last release:
+            {{package.last_release}}<br>
+            {% endif %}
+            </p>
+            <form method='POST' action='/update' id='search'>
+                Name:
+                <input type='text' class='update_text' name='package' value='{{package_name}}'>
+                Install command:
+                <input type='text' class='update_text' name='install_command' value='{{package.install_command}}'>
+                Project website:
+                <input type='url' class='update_text' name='package_website' value='{{package.website}}'>
+                Last updated:
+                <input type='time' class='update_time' name='updated_time' value='{{package.last_release}}'>
+                Distribution:
+                <select id = 'distribution' name='distro'>
+                    <option value='{{package.name}}' name='distro'>{{package.name}}</option>
+                </select>
+                <input type='submit' class='submit' value='Update package' name='request'>
+            </form>
+        {% endfor %}
+    </body>
+</html>

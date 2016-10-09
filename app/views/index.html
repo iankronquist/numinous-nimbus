@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>How Do I Install A Package?</title>
+        <meta charset='utf-8'/>
+        <link rel='stylesheet' type='text/css' href='/style.css'> 
+    </head>
+    <body>
+        <h1>How Do I Install This Package?</h1>
+        {% if not_found %}
+        <div id='create_package'>
+        <h2>Sorry, we couldn't find any packages named {{package_name}}, but you can create one.</h2>
+        <form method='POST' action='/create' id='search'>
+            Name:
+            <input type='text' class='create_text' name='package' value='{{package_name}}'>
+            Install command:
+            <input type='text' class='create_text' name='install_command' value='apt-get install {{package_name}}'>
+            Last updated:
+            <input type='time' class='create_time' name='updated_time'>
+            <select id = 'distribution' name='distro'>
+                <option value='centos' name='distro'>CentOS</option>
+                <option value='ubuntu' name='distro'>Ubuntu</option>
+                <option value='debian' name='distro'>Debian</option>
+                <option value='arch'   name='distro'>Arch Linux</option>
+            </select>
+            <input type='submit' class='submit' value='Create package' name='request'>
+        </form>
+        </div>
+
+        {% endif %}
+
+        <!--<form method='POST' action='http://classes.engr.oregonstate.edu/eecs/winter2015/cs290-400/tools/class-content/form_tests/check_request.php' id='search'>-->
+        <form method='POST' action='/' id='search'>
+            <input type='text' class='search_box' name='package' placeholder='GCC...'>
+            <select id = 'distribution' name='distro'>
+                <option value='all'    name='distro'>All Distributions</option>
+                <option value='centos' name='distro'>CentOS</option>
+                <option value='ubuntu' name='distro'>Ubuntu</option>
+                <option value='debian' name='distro'>Debian</option>
+                <option value='arch'   name='distro'>Arch Linux</option>
+            </select>
+            <input type='submit' class='submit' value='Search' name='request'>
+        </form>
+    </body>
+</html>

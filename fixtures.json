@@ -1,0 +1,55 @@
+{
+  "distros": [
+    {
+      "id": 1,
+      "name": "ubuntu",
+      "default_install_command": "apt-get install "
+    },
+    {
+      "id": 2,
+      "name": "arch",
+      "default_install_command": "pacman -S "
+    },
+    {
+      "id": 3,
+      "name": "centos",
+      "default_install_command": "yum install "
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "distro": "distros:1",
+      "website": "",
+      "name": "gcc",
+      "last_release": 1
+    },
+    {
+      "id": 2,
+      "distro": "distros:2",
+      "website": "",
+      "name": "gcc"
+    },
+    {
+      "id": 3,
+      "distro": "distros:0",
+      "website": "",
+      "name": "gcc"
+    }
+
+  ],
+  "programs": [
+    {
+      "id": 1,
+      "name": "gcc",
+      "package_id": "packages:1"
+    }
+  ],
+  "caveats": [
+    {
+      "id": 1,
+      "contents": "words",
+      "package_id": "packages:1"
+    }
+  ]
+}
