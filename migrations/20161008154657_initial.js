@@ -3,7 +3,7 @@
 exports.up = function(knex, Promise) {
   return knex.schema.createTable('distros', function(table) {
     table.integer('id').primary();
-    table.string('name').primary();
+    table.string('name').unique();
     table.string('default_install_command');
   }).createTable('packages', function(table) {
     table.integer('id').primary();
