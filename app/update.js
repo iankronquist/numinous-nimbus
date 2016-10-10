@@ -21,6 +21,7 @@ module.exports = function(app, res, body) {
       } else {
         update.last_release = body.updated_time;
       }
+      console.log(distro);
       knex('packages').update(update).where({
         name: body.package,
         distro: distro.id,

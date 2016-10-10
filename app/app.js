@@ -59,3 +59,5 @@ app.get('/:package', function (req, res) {
 app.listen(app_port, app_ip, function () {
     console.log('App now listening on %s', app_port);
 });
+
+module.exports = app;
