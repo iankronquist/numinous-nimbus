@@ -24,12 +24,12 @@ module.exports = function(app, redisClient) {
     },
 
     searchDistroPackage: (req, res) => {
-      console.log(req.params.program, 'a');
       return redisClient.hgetAsync(
         'programs',
         req.params.program
       ).then((packages) => {
         if (packages) {
+          console.log(packages);
           return Promise.all(JSON.parse(packages)
             .filter((pkg) =>  pkg.distro == req.params.distro )
               .map((pkg) => {
@@ -37,8 +37,15 @@ module.exports = function(app, redisClient) {
                   pkg.distro + ':packages',
                   req.params.program);
               })).then((packages) => {
-                console.log('a', packages);
-                return res.json(packages.map(JSON.parse));
+                if (packages.length > 0) {
+                  var item = JSON.parse(packages[0]);
+                  if (item) {
+                    return res.json(JSON.parse(packages[0]));
+                  } else {
+                    res.status(404);
+                    return res.json("not found");
+                  }
+                }
               });
         } else {
           res.status(404);
@@ -143,9 +150,12 @@ module.exports = function(app, redisClient) {
           {name: 'last_updated', type: Number},
           {name: 'caveats', type: Array},]
         for (var i = 0; i < fields.length; ++i) {
+              console.log(fields[i].name, '"~~~~~~', req.body[fields[i].name]);
           if (req.body[fields[i].name] !== null &&
             req.body[fields[i].name] !== undefined) {
+              console.log(')))))))))))))))))', req.body[fields[i].name]);
               if (req.body[fields[i].name].constructor === fields[i].type) {
+              console.log('<<<<<<<<<');
                 obj[fields[i].name] = req.body[fields[i].name];
               } else {
                 res.status(400);
@@ -154,7 +164,15 @@ module.exports = function(app, redisClient) {
 
             }
         }
-        return res.json("ok");
+                console.log('-------------', obj);
+        return redisClient.hsetAsync(
+          req.params.distro + ':packages',
+          req.params.program,
+          JSON.stringify(obj)
+        ).then(() => {
+          console.log(0, obj);
+          return res.json("ok");
+        });
       }).catch((e, ee) => {
         console.log(e,ee);
         return res.json({ 'error': e, });
