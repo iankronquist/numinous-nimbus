@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+
+\usepackage{listings}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{color}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{OliveGreen},
+  commentstyle=\itshape\color{Fuchsia},
+  identifierstyle=\color{black},
+  stringstyle=\color{Bittersweet},
+}
+
+\title{CS 496 Assignment 3: Non-Relational Database Schema}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+
+\section{Data Description}
+For my project I am building a website for finding packages from various Linux distributions. Sometimes it is difficult to find what particular package has a program I want. One common example of this is porting a dependency installation script to a new distribution. Invariably some of the packages have difficult to guess names, and it may take several Google searches and reading a couple stack overflow posts to figure out the right package name. Often distributions have poor online tools for searching for package names. Ubuntu's system is hit and miss at best, and CentOS doesn't even have a unified web portal for searching for packages. Sometimes packages aren't present in the default repositories and an additional repository like CentOS' EPEL or Arch's AUR needs to be added.
+
+To build this database I have several different types of data to track.
+
+\begin{enumerate}
+    \item I need a series of distributions with normalized names.
+    \item Each distribution has a default way of installing packages.
+    \item Each distribution has many unique package names.
+    \item These packages have many programs.
+    \item Each program may be found in a package in many distributions.
+    \item Each package has a name string, a website string, a last updated timestamp represented as a Unix epoch date, and a default install command string.
+    \item Each program has a name string and an install command string in case custom steps, such as installing CentOS' EPEL repositories, are necessary to install the program.
+    \item I also created a caveats section to give users a way to add comments or issues with installing a certain package, but I did not have time to expose this through the UI.
+\end{enumerate}
+
+\section{Relational Database Schema}
+This design led itself to a fairly straightforward SQL schema. Since I already knew how to use the Knex.js SQL builder library I was able to quickly create the database. When I was developing locally I used the lightweight serverless SQLite database, but to deploy to production I used Heroku's Postgres add-on. My Knex.js configuration needed only minimal tweaks to work with Postgres. Additionally, Knex provided an easy way to do database migrations should I need to change the tables. I also found a library called SQLFixtures which leveraged Knex to populate the tables with test fixture data from a JSON file.
+
+\lstset{language=C,caption={Knex.js SQL migrations},label=migrations}
+\begin{lstlisting}
+'use strict'
+
+exports.up = function(knex, Promise) {
+  return knex.schema.createTable('distros', function(table) {
+    table.integer('id').primary();
+    table.string('name').unique();
+    table.string('default_install_command');
+  }).createTable('packages', function(table) {
+    table.integer('id').primary();
+    table.integer('distro').references('id').inTable('distros');
+    table.string('website');
+    table.string('name');
+    table.string('install_command');
+    table.bigInteger('last_release');
+  }).createTable('programs', function(table) {
+    table.integer('id').primary();
+    table.integer('package_id').references('id').inTable('packages');
+    table.string('name');
+  }).createTable('caveats', function(table) {
+    table.integer('id').primary();
+    table.string('contents');
+    table.integer('package_id').references('id').inTable('packages');
+  });
+};
+
+exports.down = function(knex, Promise) {
+  return knex.schema.dropTable('distros')
+    .dropTable('packages')
+    .dropTable('programs')
+    .dropTable('caveats');
+};
+\end{lstlisting}
+
+
+\section{Redis Key-Value Store Schema}
+For this assignment I needed to reconsider the structure of the database and redesign it to leverage the Redis key-value store. I chose Redis because it is a robust, well designed key-value store database. When I considered my options, I realized there are three common types of non-relational databases: graph databases like Neo4j, document stores like MongoDB and Elastic Search, and key-value stores like Redis and etcd. My data does not lend itself to  being described by a graph, and my data is also highly structured, so it doesn't require the flexible document store model. I chose Redis because its high level data structures like hash maps, sets, sorted sets, and queues allow me to describe the structure of my data and have fast lookup times.
+
+The schema is as follows:
+\begin{enumerate}
+    \item There is a hash map named \texttt{programs}. Each key is the name of a program. Each value is a string representing a JSON object with the following format:
+
+\lstset{language=C,caption={Programs map value schema},label=migrations}
+\begin{lstlisting}
+[
+	{
+		"distro": "distro1",
+		"package": "package1"
+	},
+	{
+		"distro": "distro2",
+		"package": "package2"
+	},
+]
+\end{lstlisting}
+    All of the fields are required.
+
+    \item For each distro \textit{d}, there is a hash map named \texttt{\textit{d}:packages}. Each key in the hash map is the name of a package. Each value is a string representing a JSON object:
+
+\lstset{language=C,caption={Packages map value schema},label=migrations}
+\begin{lstlisting}
+{
+	"website": "foobar.com",
+	"install_command": "yum install gcc",
+	"last_updated": 00000,
+	"caveats": [ "I had issues with foo", "I had issues with bar, this was my work around"]
+}
+\end{lstlisting}
+    All of the fields are optional.
+
+\end{enumerate}
+
+This schema allows for relatively fast lookup times. Each search will take one or two hashtable lookups with \textit{O(1)} time. By contrast, the SQL database implementation I considered used an inner join, which may take \textit{O(n)} time, depending on how it is implemented.
+
+However, I suspect that the processing time for this small database using the very efficient Postgres and Redis engines will be dominated by network request times. Communicating with a remote Redis or Postgres host, even in the same data center, will take an order of magnitude more than the time needed to process a simple query. In my prototype for assignment 2 for the SQL database most of my pages needed one SQL statement. However, a couple of pages required two statements which would be transmitted serially along the same connection. However, the Redis query would always take two commands. Ultimately, speculating on the look up times is not terribly insightful. As opposed to speculation I could do a true performance evaluation. However, both Redis and Postgres are highly efficient and optimized databases which are used to handle datasets far larger and more complex than mine, so they are more than sufficient for my needs
+
+\section{Advantages and Drawbacks of Redis and the Redis Schema}
+Relational databases store data with a strict structure. This structure provides type safety for the data. However, it can be difficult to set up the database, and ensure that all of the constraints are met.  It is all to easy to write data which is of the wrong type or violates a key constraint, and have your request be rejected. I believe that this is actually a helpful feature which can protect a programmer from their own mistakes.
+
+Many production quality databases are difficult to configure and can quickly grow to massive sizes and have incredibly complex tables. Many NoSQL databases like Redis are incredibly easy to use right out of the box. They require no configuration, and connection is as easy as starting the server, and starting the client. Unfortunately many developers don't take the time to properly configure their Redis servers, and their are thousands of Redis servers exposed to the internet which will accept connections from absolutely anyone.  
+
+The ease of use of Redis is by no means a monopoly. It's easy to set up a serverless SQLite database which also doesn't require authentication. Since SQLite DBs are just files on a filesystem, they are only accessible locally, and rely on the operating system for access control. This similar ease of use makes them a great choice for local development. It's not too difficult to write a SQL database schema for both Postgres and SQLite and use a local SQLite development database, while using Postgres in production. Heroku also offers free small Postgres databases which are easy to connect to using a configuration connection string present in the application's environment variables.
+
+In the Redis database several values hold JSON data. My schema expects several values to be present, and several to be optional. However, Redis will not enforce this schema on the JSON, and it is possible to accidentally insert bogus data which doesn't match the schema, or may not even be JSON. This is a weakness of many non-relational databases. Their flexibility makes them easy to use, but mistakes may be hard to catch.
+
+\end{document}

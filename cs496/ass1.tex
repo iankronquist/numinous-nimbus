@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+
+\title{CS 496 Assignment 1: Hello Cloud}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+Live website URL: http://numinous-nimbus.herokuapp.com/
+
+\section{Cloud Provider}
+For this assignment I chose Heroku as my cloud provider. Heroku is free and easy to use for small projects, and for a small fee can scale rapidly. Heroku is a cloud platform -- heroku users don't need to worry about configuring servers or scaling their application. Heroku takes care of all of that behind the scenes. Additionally, it knows how to start web applications with literally zero configuration. I merely provided a \texttt{start} script in my node project`s \texttt{package.json} file, and pushed to a heroku git remote server and my application was automatically started. I had no idea that it would be that easy. Heroku also has integrations with GitHub. As my App scales I may have heroku deployments trigger when a GitHub Pull Request is merged so I never forget to push to the heroku git remote.
+
+\section{Non-Relational Database}
+There are many types of non-relational databases available. Several of the more common types of such databases include key-value stores, graph databases, and document stores.
+
+A classic example of a key-value store is Redis. To insert or retrieve data from a Redis server you need a unique key. Keys can be timestamps, cryptographic hashes, file names, or any other combination of printable characters. The data inserted into the store is typed. It may be a number, a date, text, or a binary blob. The values can also be more complex data types including lists, sets, hash tables, and sorted lists. An alternative key-value store is Etcd. Etcd is a distributed database, which means that the data is spread across nodes which may exist on many data centers across the globe. Etcd which uses the Raft distributed consensus protocol so that all of the nodes agree on the current state of the data. Each etcd key typically has a Time To Live, that is a time after which it expires. Etcd is usually used for to maintain global consistent configuration values for applications.
+
+Graph databases store data organized as graphs (in the Computer Science sense of the term). Instead of tables having many rows, there are graphs which have many nodes which may be connected by many edges. Graph databases, like Neo4J, can leverage fast traversal, path finding, and lookup algorithms. If your problem can be reduced to a classic graph or flow problem from computer science, a graph database could be an excellent choice for storing and manipulating your data.
+
+Document stores allow you to chuck arbitrary data with little to know structure directly into the database. A classic example is MongoDB, which allows users to put collections of arbitrary JSON objects directly into the database. JSON objects can be added or removed from a connection, and can be queried based on their properties.
+
+Heroku offers a Redis database available for free as an add on, as well as a similar Postgres Relational Database offering. Alternatively, if I decide I need another database, I could set it up myself on a free Digital Ocean server from the GitHub Education pack.
+
+\section{Dynamic Page Generation}
+NodeJS has many different options for dynamic page generation. Three common choices are EmbeddedJS, Jade, and Nunjucks, all of which allow users to do essentially the same thing. Users can pass arbitrary Javascript variables or code into templates which are translated into HTML. In order to allow users to conditionally insert HTML elements or insert arbitrary numbers of such elements these languages have equivalents of \texttt{if} statements and \texttt{for} loops. The ability to have conditional control flow and unbounded looping is sufficient to make these templating languages Turing Ctomplete.
+
+EmbeddedJS is a port of Embedded Ruby or ERB to Javascript. Much of the syntax is the same, but instead of using Ruby inside of the templates, Javascript is used instead. ERB is widely used in the Ruby on Rails Web Application Framework.
+
+By a similar token, Nunjucks is a port of the Django or Flask Python web application frameworks' similar templating languages to Javascript. This allows templates from a Django website to be ported to a NodeJS website with Nunjucks with little effort.
+
+Jade is somewhat more radical than the other templating languages. As opposed to embedding Javascript or another language within HTML documents, Jade creates a completely new language which is translated into HTML. Unlike the other languages, Jade cannot generate non-XML based documents, making it considerably more special purpose.
+
+\section{Web Application Ideas}
+One idea is a web application which tracks which GitHub projects are trending on Hacker News. Hacker News is an online community for engineers who work at Bay Area startups. It is a community curated news aggregator where anyone can submit a link. Frequently there are links to interesting GitHub projects on the site. The goal of this website would be to tie into both the Hacker News and GitHub APIs and provide a curation of GitHub repositories which are popular with this community and various information about the repositories including the number of forks, stars, and the language which the repository is written in.
+
+Another idea for a web application would be an interactive assembler. Users would enter assembly and would be able to tell which bytes of the outputted hexadecimal binary came from which parts of the assembly code. This way students could learn more about how assembly is translated into the underlying instruction set.  It would need to store information about the supported assembly languages, their instructions, and the operators and operands relating to those instructions.
+
+Yet another idea would be a website devoted to helping users figure out what packages are available in their distributions. Consider a user who wants to install \texttt{grub-mkrescue} on Ubuntu. They could type in the name of the program and learn that it is part of the \texttt{grub-utils} package. They could also see how to install it on Fedora or Centos instead, as well as the packages' dependencies. Certain dependencies are available via language specific package managers, or can be compiled from source as well. This website would store information about different executables, configuration files, packages, and package managers and would unite it under a single interface. It would also have a wiki like interface allow users to add sections about how to compile the package from scratch, or links to the project bug trackers.
+
+\end{document}

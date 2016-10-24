@@ -1,0 +1,105 @@
+\documentclass[12pt]{article}
+
+\title{CS 496 Assignment 1: Hello Cloud}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+Live website URL: http://numinous-nimbus.herokuapp.com/
+
+\section{Test Suite}
+For this assignment I used the mocha test framework. Mocha is a popular node package available on NPM which supports many libraries and has a number of useful features. It is an rspec style framework where each test is wrapped in its own clause. One tricky thing about Mocha that it depends on callbacks. If you don't pass a callback to a function to a mocha test it will always pass, even if it otherwise should have failed. I also used an assertions framework called supertest for checking responses to my web pages. Supertest is designed to work with the express web application framework I'm using. It allows you to easily send HTTP request to an express application and assert that the error code, body contents, etc. are all as expected.
+
+\section{Test plan}
+I performed a mix of manual and automated testing. I manually tested that each field could be updated independently. I checked that you couldn't insert duplicate entries. I also wrote an automatic test suite with 12 tests.
+
+Automated tests:
+
+1. Test that a get request to / returns 200.
+
+2. Test that a get request to /create returns 404.
+
+3. Test that a get request to /update returns 404.
+
+4. Test that a post request to / returns the searched data.
+
+5. Test that creating a new item via a post request / returns 200 and returns html if all fields are present.
+
+6. Check that the newly created item is present if searched for.
+
+7. Test that creating a new item via a post request / returns 200 and returns html if the website field is not present
+
+8. Check that the newly created item is present if searched for.
+
+9. Test that creating a new item via a post request / returns 200 and returns html if the last\_updated field is not present
+
+10. Check that the newly created item is present if searched for.
+
+11. Test that creating a new item via a post request / returns 200 and returns html if neither the website nor the last\_updated field is not present
+
+12. Check that the newly created item is present if searched for.
+
+Manual Tests:
+
+1. I checked that you couldn't change the distribution page when editing search results.
+
+2. I checked that you could leave the website field blank.
+
+3. I checked that you could not put non-URL in the website field.
+
+4. I checked that database migrations work properly against both SQLite and PostgreSQL.
+
+5. I checked that you could not put a non-number in the update timestamp field.
+
+6. I checked that you were sent to the search page after updating an entry.
+
+7. I checked that you were sent to the search page after creating an entry.
+
+8. I checked that searching for an absent field redirected you back to the main page.
+
+9. I checked that searching for an absent field showed a creation form on the main page.
+
+10. I checked that the default command was properly assembled for CentOS packages.
+
+11. I checked that the default command was properly assembled for Ubuntu packages.
+
+12. I checked that the default command was properly assembled for Arch Linux packages.
+
+13. I checked that the default command was properly inserted in the install command text box for new commands.
+
+I performed additional manual tests which I won't bother listing.
+
+\section{Automated Test Results}
+All of the automated tests pass.
+\begin{verbatim}
+./node_modules/.bin/mocha tests/tests.js 
+
+
+App now listening on 8888
+  Package creation
+    ✓ should serve html from /
+    ✓ should not serve html from /create
+    ✓ should not serve html from /update
+    ✓ should create an object if I post to /create
+    ✓ should update an object if I post to /update
+    ✓ should show the new package when I request it
+    ✓ should create an object if I post to /create
+    ✓ should show the new package when I request it
+    ✓ should show the new package when I request it
+  12 passing (111ms)
+
+
+\end{verbatim}
+
+\section{Templating}
+I used the Nunjucks package for templating since it is closest to the frameworks I am familiar with. It was incredibly easy to create templates for arbitrary numbers of entries and optional fields. I could also make pages optionally display messages based on the variables passed to them. I took special care to avoid complicated logic in the view templates so that I could maintain clean separation of concerns.
+
+One tricky thing is keeping straight the names of the fields in the form, the fields in the database, the variables in the template, and the variables in the javascript code. For instance, the word \texttt{package} is a reserved keyword in certain contexts in modern javascript, but I used it in the HTML form and the database, so the data which started out as \texttt{package} was renamed to \texttt{package\_name} and then renamed the \texttt{package} again. This goes to show that naming is one of the hardest problems in computer science.
+
+\section{Reflection}
+If I had to do it again I would provide myself more time. I wish I had been able to carefully layout all of the names of the data structures and variables ahead of time. I also wish that I had created the tests ahead of time and followed a test-driven-development paradigm. This would have made it easier for me to think about all of the cases I would have needed to consider. Ultimately, more time spent up front with a pencil and paper outlining the structure of the application may have saved me time.
+
+Additionally, I did not have time to work on the CSS for the website. I'm not particularly good with CSS and I could stand to learn some more, but I ran out of time to style it well. I did make sure to annotate my HTML tags with logical ids and classes ahead of time so they would be easy to style. It would also have been nice to make it so the edit forms could be hidden by default and only shown if you click the edit button. Unfortunately, I did not have time to implement that feature, although I did do research to learn how I would accomplish it.
+
+\end{document}

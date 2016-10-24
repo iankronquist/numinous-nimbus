@@ -1,0 +1,85 @@
+\documentclass[12pt]{article}
+
+\usepackage{listings}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage{color}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{OliveGreen},
+  commentstyle=\itshape\color{Fuchsia},
+  identifierstyle=\color{black},
+  stringstyle=\color{Bittersweet},
+}
+
+
+\title{CS 496 Assignment 1: Hello Cloud}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+Live website URL: http://numinous-nimbus.herokuapp.com/
+
+\section{API}
+The site uses a simple URI scheme and four HTTP verbs to implement a simple REST API. There are two URI schemes. The first is only available with GET requests. GET \texttt{/\$PACKAGE}, where \texttt{\$PACKAGE} is some package name, will return a JSON array of packages which have that program. Each item in the list is a JSON object with a field names \texttt{distro} and another field named \texttt{package}. The values of both fields are strings.
+
+\lstset{language=C,caption={Programs map value schema},label=migrations}
+\begin{lstlisting}
+[
+	{
+		"distro": "distro1",
+		"package": "package1"
+	},
+	{
+		"distro": "distro2",
+		"package": "package2"
+	},
+]
+\end{lstlisting}
+
+The other URI scheme is \texttt{/\$DISTRO/\$PACKAGE}. Similar to above, \texttt{\$DISTRO} here is some distribution name like ``ubuntu'' or ``centos''. URLs in this form accept the following verbs GET, POST, PUT, and DELETE. GET returns the package with that name. POST creates a new package with that name. PUT updates a package with that name. DELETE removes a package with that name. POST also creates a program with that name. PUTting a package which has not been posted has undefined behavior (note that no requirements for the  behavior were specified in the assignment). You can not presently create a package with a different name than the program. I would like to improve this given time. Each package is a JSON object with the following schema:
+
+\lstset{language=C,caption={Packages map value schema},label=migrations}
+\begin{lstlisting}
+{
+	"website": "foobar.com",
+	"install_command": "yum install gcc",
+	"last_updated": 00000,
+	"caveats": [ "I had issues with foo", "I had issues with bar, this was my work around"]
+}
+\end{lstlisting}
+All of the fields are optional.
+When a package is deleted the corresponding distribution is also deleted.
+
+\section{Testing}:
+I did considerable manual testing both locally and on heroku. Additionally I wrote a bash script which made a series of calls to curl and piped the output to grep to ensure that it contained what I expected. I wrote a total of 11 test cases exercising the full functionality of the application. If grep exits unsuccessfully, the test will fail. It would have been nice to produce more formal tests, but this met the requirements given my after-work time budget this week. The tests helped catch some important regressions right before I was finished. I made sure to send invalid data and check that it was properly rejected.
+
+\lstset{language=bash,caption={Programs map value schema},label=migrations}
+\begin{lstlisting}
+set -e
+URL=numinous-nimbus.herokuapp.com
+# This populates Redis with test data. You must be properly authorized to perform this action!
+heroku run node fill.js
+curl -H "Content-Type: application/json" -X POST -d '{"screencast":{"subject":"tools"}}' $URL/ubuntu/g++ | grep '{"error":"No correct fields were sent"}'
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep '"website":"gnu.org"'
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep '"install_command":""'
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep '"last_updated":0'
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep '"caveats":\[.*\]'
+curl -s -H "Content-Type: application/json" -X DELETE $URL/ubuntu/gcc | grep ok
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep 'not found'
+curl -s -H "Content-Type: application/json" -X POST -d '{"last_updated":0}' $URL/ubuntu/gcc
+curl -s -H "Content-Type: application/json" -X GET $URL/ubuntu/gcc | grep '{"last_updated":0}'
+curl -s -H "Content-Type: application/json" -X PUT -d '{"website":"example.com","last_updated":1}' $URL/ubuntu/gcc | grep 'ok'
+curl -s -H "Content-Type: application/json" -X GET  $URL/ubuntu/gcc | grep '"last_updated":1'
+curl -s -H "Content-Type: application/json" -X GET  $URL/ubuntu/gcc | grep '"website":"example.com"'
+\end{lstlisting}
+
+\end{document}

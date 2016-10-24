@@ -1,0 +1,36 @@
+\documentclass[12pt]{article}
+
+\usepackage{graphicx}
+
+\title{CS 496 Lab 2: HTTP}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}
+    \item My browser was  using HTTP 1.1, as was the server.
+    \item My browser can accept \texttt{en-US} and \texttt{en}.
+    \item My browser's IP is 192.168.43.114. The server's is 128.119.245.12.
+    \item The status code the server returned was 200 OK.
+    \item The HTML file was last modified at Sat, 22 Oct 2016 05:59:01 GMT.
+    \item The content length was 128 bytes.
+    \item I do not see any HTTP headers not present in the wireshark in the packet-listing window.
+    \item No I do not see an ``IF-MODIFIED-SINCE'' header.
+    \item I can look at the ``Line-based text data text/html'' field in the wireshark packet inspector or look at the raw packet and see that the webpage was explicitly returned.
+    \item Yes, I see an ``IF-MODIFIED-SINCE'' header.
+    \item The status code was 304 Not-Modified. I do not see the HTML content. In the second request my browser asked the server to only return the data if it had been modified since my browser last retrieved it. This is because my browser had cached the old version of the data and would not need to download it if it hadn't changed.
+    \item Only one GET request was sent by my browser. Only one packet was sent. The first packet contains the GET request.
+    \item Four TCP packets were received by my browser. The first TCP packet contains the status code 200 OK.
+    \item The status code is 200 and the phrase is OK.
+    \item 4 data-containing TCP segments were required.
+    \item My browser sent 4 GET requests to the following IP addresses: 128.119.245.12, 128.119.240.90.
+    \item By inspecting the timestamps on the GET requests and their respective responses I can see that the two were made serially and the two were made in parallel. This is because four resources were fetched. The first was the HTML page which contained two images. Once that was received and decoded my browser fetched the images in parallel. However, one of the GET requests returned 302 FOUND, which was a redirect to another URL. My browser had to receive that request, decode it, and issue another request to the new URL.
+    \item The server's initial response is 401 Unauthorized.
+    \item The ``Authorization: Basic'' field is included with the following value: ``d2lyZXNoYXJrLXN0dWRlbnRzOm5ldHdvcms=''.
+
+
+
+\end{enumerate}
+
+\end{document}
