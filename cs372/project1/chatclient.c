@@ -64,7 +64,7 @@ int init_connection(char *readable_address, int port) {
         herror("Couldn't get host name");
         exit(EXIT_FAILURE);
     }
-    memcpy(host->h_addr, &serv_addr.sin_addr, host->h_length);
+    memcpy(&serv_addr.sin_addr, host->h_addr, host->h_length);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);
     ret = connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
