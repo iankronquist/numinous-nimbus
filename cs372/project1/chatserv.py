@@ -17,7 +17,6 @@ def message_loop(server_handle, sock):
             return False
         handle = message[:10]
         body = message[10:]
-        print message, type(message)
         print('{}> {}'.format(handle, body))
         if body[:6] == '\\quit\0':
             return False
@@ -43,20 +42,12 @@ if __name__ == '__main__':
         exit(-1)
     port = int(sys.argv[1])
     handle = sys.argv[2]
-    print port
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print sock.getsockname()
     sock.bind(('0.0.0.0', port))
-    print sock.getsockname()
     while True:
         sock.listen(5)
-        print 1
         (clientsock, address) = sock.accept()
-        print 2
         send_handle(handle, clientsock)
-        print 3
         if message_loop(handle, clientsock):
             break
-        print 4
         clientsock.close()
-        print 5
