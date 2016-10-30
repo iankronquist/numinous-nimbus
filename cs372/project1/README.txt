@@ -40,3 +40,9 @@ In another on the same host:
 
 Alternately, to connect to the flip server:
 ./chatclient access.engr.oregonstate.edu 10000 client
+
+## Resources Used
+I consulted some old code I had from CS 411 which had a very similar
+assignment. I also consulted the man pages, pydoc, and the Python sockets
+tutorial.
+https://docs.python.org/2/howto/sockets.html
