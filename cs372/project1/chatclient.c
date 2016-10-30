@@ -50,6 +50,7 @@ void get_remote_handle(const int fd) {
 int init_connection(char *readable_address, int port) {
     int socketfd, ret;
     struct sockaddr_in serv_addr;
+    struct hostent *host;
 
     socketfd = socket(AF_INET, SOCK_STREAM, IP_PROTOCOL);
     if (socketfd < 0) {
@@ -57,7 +58,13 @@ int init_connection(char *readable_address, int port) {
         exit(1);
     }
     bzero((char*) &serv_addr, sizeof(serv_addr));
-    inet_pton(AF_INET, readable_address, &serv_addr.sin_addr);
+    //inet_pton(AF_INET, readable_address, &serv_addr.sin_addr);
+    host = gethostbyname(readable_address);
+    if (host == NULL) {
+        herror("Couldn't get host name");
+        exit(EXIT_FAILURE);
+    }
+    memcpy(host->h_addr, &serv_addr.sin_addr, host->h_length);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);
     ret = connect(socketfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
