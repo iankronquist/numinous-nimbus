@@ -40,6 +40,7 @@ import org.apache.http.entity.mime.content.StringBody;
 
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,6 +57,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Act1 extends Activity {
@@ -73,53 +75,41 @@ public class Act1 extends Activity {
         Button photoButton;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_act1);
-        Log.d("Act1", "logging1");
 
-        try {
-            Log.d("Act1", "logging2");
 
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/picFolder/";
-            newdir = new File(dir);
-            newdir.mkdirs();
-            Log.d("Act1", "logging3");
-
-        } catch (Exception e) {
-            Log.e("mkdirs", "Had trouble making dirs " + e.getMessage());
-            e.printStackTrace();
-            return;
-        }
-
-        Log.d("Act1", "logging4");
         postButton = (Button) findViewById(R.id.postButton);
         postButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
+                Toast.makeText(Act1.this, "Uploading...", Toast.LENGTH_LONG).show();
                 new PostToImgur().execute("Pic.jpg");
             }
         });
 
-        Log.d("Act1", "logging5");
         photoButton = (Button) findViewById(R.id.photoButton);
         photoButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
+
                 takePhoto(v);
             }
 
         });
-        Log.d("Act1", "logging6");
     }
 
     public void takePhoto(View view) {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                         PackageManager.PERMISSION_GRANTED) {
-            Log.d("TakePicture", "logging3");
 
             requestPermissions(new String[]{Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-            Log.d("TakePicture", "logging4");
 
-        }
-        Log.d("TakePicture", "logging5");
+        } /*else {
+            Toast.makeText(Act1.this,
+                    "Okay, but we can't really do much without those permissions",
+                    Toast.LENGTH_LONG).show();
+        }*/
+
+
 
         try {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -128,14 +118,13 @@ public class Act1 extends Activity {
             new FileOutputStream(photo).close();
             imageUri = FileProvider.getUriForFile(Act1.this,
                     BuildConfig.APPLICATION_ID + ".provider", photo);
-            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.putExtra(MediaStore.EXTRA_OUTPUT,
                     imageUri);
             startActivityForResult(intent, TAKE_PICTURE);
         } catch (Exception e) {
-            Log.d("TakePicture", "logging6" + e.toString());
-
             e.printStackTrace();
+            Toast.makeText(Act1.this, "Uh oh! Looks like we had a problem", Toast.LENGTH_LONG).show();
+
         }
     }
 
@@ -168,58 +157,70 @@ public class Act1 extends Activity {
                 }
         }
     }
-}
 
 
-class PostToImgur extends AsyncTask<String, Void, Boolean> {
+    class PostToImgur extends AsyncTask<String, Void, Boolean> {
 
-    private Exception exception;
-
-
-    protected Boolean doInBackground(String... files) {
-        final String upload_to = "https://api.imgur.com/3/upload.json";
-        final String API_key = "e4d31dbb14e259fa15db0878bb1ae5def4075fb0";
-        final String clientId = "669c016e544468d";
-        final String TAG = "Awais";
+        private Exception exception;
+        String imageName;
 
 
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpContext localContext = new BasicHttpContext();
-        HttpPost httpPost = new HttpPost(upload_to);
-        httpPost.setHeader("Authorization", clientId);
-
-        try {
-            final MultipartEntity entity = new MultipartEntity(
-                    HttpMultipartMode.BROWSER_COMPATIBLE);
-            File photo = new File(Environment.getExternalStorageDirectory(), "Pictures/Pic.jpg");
+        protected Boolean doInBackground(String... files) {
+            final String upload_to = "https://api.imgur.com/3/upload.json";
+            final String API_key = "e4d31dbb14e259fa15db0878bb1ae5def4075fb0";
+            final String clientId = "669c016e544468d";
 
 
-            entity.addPart("image", new FileBody(photo));
-            entity.addPart("key", new StringBody(API_key));
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpContext localContext = new BasicHttpContext();
+            HttpPost httpPost = new HttpPost(upload_to);
+            httpPost.addHeader("Authorization", "Client-ID " + clientId);
 
-            httpPost.setEntity(entity);
 
-            final HttpResponse response = httpClient.execute(httpPost, localContext);
+            try {
+                final MultipartEntity entity = new MultipartEntity(
+                        HttpMultipartMode.BROWSER_COMPATIBLE);
+                File photo = new File(Environment.getExternalStorageDirectory(), "Pictures/Pic.jpg");
 
-            final String response_string = EntityUtils.toString(response
-                    .getEntity());
 
-            final JSONObject json = new JSONObject(response_string);
+                entity.addPart("image", new FileBody(photo));
+                entity.addPart("key", new StringBody(API_key));
 
-            Log.d("JSON", json.toString()); //for my own understanding
+                httpPost.setEntity(entity);
 
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.d("PostFailure", "logging 1" + e.toString());
+                final HttpResponse response = httpClient.execute(httpPost, localContext);
+
+                final String response_string = EntityUtils.toString(response
+                        .getEntity());
+
+                final JSONObject json = new JSONObject(response_string);
+                Log.d("JSON", "received json object:" + json.toString());
+
+                if (response.getStatusLine().getStatusCode() == 200 &&
+                        json.getBoolean("success")) {
+                    imageName = "https://imgur.com/" + json.getJSONObject("data").getString("id");
+                } else {
+                    imageName = "Request failed with status " +
+                            response.getStatusLine().getStatusCode() + " and error " +
+                            json.getString("error");
+                }
+                return true;
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(Act1.this,
+                        "Oops, couldn't upload the image! Make sure you're connected to the internet and try again",
+                        Toast.LENGTH_LONG).show();
+                Log.d("PostFailure", "failed to do something " + e.toString());
+                return false;
+            }
         }
-        return false;
 
-
-    }
-
-    protected void onPostExecute(Boolean feed) {
-        // TODO: check this.exception
-        // TODO: do something with the feed
+        protected void onPostExecute(Boolean feed) {
+            TextView output;
+            output = (TextView) findViewById(R.id.output);
+            output.setText(imageName);
+        }
     }
 }
