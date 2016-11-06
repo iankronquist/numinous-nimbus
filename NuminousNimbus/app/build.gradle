@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "edu.oregonstate.kronquii.numinousnimbusandroid"
-        minSdkVersion 15
+        minSdkVersion 24
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -25,5 +25,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'org.json:json:20160212'
-
+    compile "org.apache.httpcomponents:httpmime:4.2.3"
 }
