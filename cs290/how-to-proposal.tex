@@ -1,0 +1,18 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{float}
+
+\title{CS 290 How to Proposal}
+\author{Ian Kronquist}
+
+\begin{document}
+\maketitle
+
+My How-To proposal creatively combines several APIs. It allows users to easily upload an image from their private Dropbox to a public Imgur link, where it can be viewed and shared. I focus on integrating the two APIs and using them together. Even though Imgur is not an approved API, the Dropbox API is approved so it should not be a problem.
+
+I propose a website which allows users to take a photo from their private Dropbox, and upload it to Imgur. The website will need to authenticate with both Dropbox and Imgur. It will then need to request a list of a Dropbox user's files, and filter via images which Imgur accepts, to display them to the user. The user may then pick an image, and select it to be uploaded. The image will be downloaded from Dropbox, and then uploaded to Imgur. The website will asynchronously display the Imgur URL to the user and then clean up any downloads in the background.
+
+I plan to implement this project in NodeJS using the Jinja markup library and the Express web application framework. On the front end I will make asynchronous requests to my server, which will make different requests to the content providers before sending a response to the user. The website will probably run on the Heroku platform. It will not require any databases, just access to the filesystem as a temporary image cache.
+
+
+\end{document}
