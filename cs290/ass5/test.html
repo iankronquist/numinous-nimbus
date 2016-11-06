@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CS290 Assignment</title>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<form method='GET'>
+			<fieldset>
+				<!-- There should be 4 input types  -->
+				<legend>View the weather anywhere in the US</legend>
+				<fieldset>
+					<!-- A number input with a name attribute of 'numerical_input' -->
+					Zip Code:
+					<input id="zip" type="number" name='numerical_input' value='97331' />
+				</fieldset>
+			</fieldset>
+			<input type="submit" id='zipsubmit'/>
+		</form>
+		<div id='weather'> </div>
+
+
+		<form method='POST'>
+			<fieldset>
+				<legend>Post form</legend>
+				<input type="submit" id='getter' />
+			</fieldset>
+		</form>
+		<div id='postresp'> </div>
+	</body>
+
+
+
+	<script>
+		function postRequest() {
+			var req = new XMLHttpRequest();
+			var apiKey = 'f5fab8dc68e44825cff69f17196eb420';
+			req.open("POST", "http://httpbin.org/post", true);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.addEventListener('load', function() {
+				var resp = JSON.parse(req.responseText);
+				console.log(resp);
+				var text = "json: " + resp.json + " origin " + resp.origin + " url: " + resp.url;
+				document.getElementById('postresp').innerHTML = text;
+			});
+			req.send(JSON.stringify("Hello World!"));
+		}
+		document.getElementById('getter').addEventListener('click', function(event) {
+			postRequest();
+			event.preventDefault();
+		});
+
+		function getRequest() {
+			var zipCode = document.getElementById('zip').value;
+			console.log('getting ' + zipCode);
+			var req = new XMLHttpRequest();
+			var apiKey = 'f5fab8dc68e44825cff69f17196eb420';
+			req.open("GET", "http://api.openweathermap.org/data/2.5/weather?zip=" + zipCode + ",us&appid=" + apiKey, true);
+			req.addEventListener('load', function() {
+				var resp = JSON.parse(req.responseText);
+				console.log(resp);
+				var text = "";
+				if (resp.cod == 200) {
+					text = "The weather in zip code " + zipCode + " near " + resp.name + " is " + resp.weather[0].description;
+				} else {
+					text = "Request failed with code " + resp.cod + "<br> " + resp.message + "<br>Try again.";
+				}
+				document.getElementById('weather').innerHTML = text;
+			});
+			req.send(null);
+		}
+		document.getElementById('zipsubmit').addEventListener('click', function(event) {
+			getRequest();
+			event.preventDefault();
+		});
+	</script>
+
+</html>
