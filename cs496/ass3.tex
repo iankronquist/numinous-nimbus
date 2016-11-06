@@ -59,6 +59,17 @@ The other URI scheme is \texttt{/\$DISTRO/\$PACKAGE}. Similar to above, \texttt{
 All of the fields are optional.
 When a package is deleted the corresponding distribution is also deleted.
 
+\section{REST Constraints}
+\begin{enumerate}
+\item Client-Server. My application has a client-server relationship. The client in this case may be curl or a web browser. The server is hosted by heroku.
+\item Stateless. My application is stateless. This does not mean that there is no state whatsoever, after all I do have a database, but rather that each individual request is stateless.
+\item Cache. My application has no cache.
+\item Interface / Uniform Contract. My application has a clear and uniform API contract asdescribed above.
+\item Layered System. My application has a layered system. My Redis provider could easily be replaced and my application would only need to be restarted. Alternatively, we could replace Redis with a different key-value store, and replace the Redis Nodejs library. As long as the Redis library replacement meets the same contract it will behave the same.
+\item Code-On-Demand. Client side code can be updated independently from server side code. A new version of FireFox or Curl can be released separately from my application. However, my application has no client side javascript, so it is trivially a Code-On-Demand system.
+\end{enumerate}
+
+
 \section{Testing}:
 I did considerable manual testing both locally and on heroku. Additionally I wrote a bash script which made a series of calls to curl and piped the output to grep to ensure that it contained what I expected. I wrote a total of 11 test cases exercising the full functionality of the application. If grep exits unsuccessfully, the test will fail. It would have been nice to produce more formal tests, but this met the requirements given my after-work time budget this week. The tests helped catch some important regressions right before I was finished. I made sure to send invalid data and check that it was properly rejected.
 
