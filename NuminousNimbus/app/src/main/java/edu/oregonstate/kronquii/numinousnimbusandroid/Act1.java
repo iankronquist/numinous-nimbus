@@ -10,8 +10,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -22,7 +21,6 @@ import android.view.View.OnClickListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 
 import org.apache.http.HttpResponse;
@@ -40,22 +38,7 @@ import org.apache.http.entity.mime.content.StringBody;
 
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.Settings;
-
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,7 +53,6 @@ public class Act1 extends Activity {
         Log.d("TakePicture", "logging-----------------------------------------");
 
         final String dir;
-        File newdir;
         Button postButton;
         Button photoButton;
         super.onCreate(savedInstanceState);
@@ -88,7 +70,6 @@ public class Act1 extends Activity {
         photoButton = (Button) findViewById(R.id.photoButton);
         photoButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-
                 takePhoto(v);
             }
 
@@ -99,17 +80,9 @@ public class Act1 extends Activity {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                         PackageManager.PERMISSION_GRANTED) {
-
             requestPermissions(new String[]{Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-
-        } /*else {
-            Toast.makeText(Act1.this,
-                    "Okay, but we can't really do much without those permissions",
-                    Toast.LENGTH_LONG).show();
-        }*/
-
-
+        }
 
         try {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -123,8 +96,8 @@ public class Act1 extends Activity {
             startActivityForResult(intent, TAKE_PICTURE);
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(Act1.this, "Uh oh! Looks like we had a problem", Toast.LENGTH_LONG).show();
-
+            Toast.makeText(Act1.this, "Uh oh! Looks like we had a problem",
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -170,12 +143,10 @@ public class Act1 extends Activity {
             final String API_key = "e4d31dbb14e259fa15db0878bb1ae5def4075fb0";
             final String clientId = "669c016e544468d";
 
-
             HttpClient httpClient = new DefaultHttpClient();
             HttpContext localContext = new BasicHttpContext();
             HttpPost httpPost = new HttpPost(upload_to);
             httpPost.addHeader("Authorization", "Client-ID " + clientId);
-
 
             try {
                 final MultipartEntity entity = new MultipartEntity(
@@ -205,8 +176,6 @@ public class Act1 extends Activity {
                             json.getString("error");
                 }
                 return true;
-
-
             } catch (Exception e) {
                 e.printStackTrace();
                 Toast.makeText(Act1.this,
