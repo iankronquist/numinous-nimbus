@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Request checker</title>
+		<meta charset='utf-8'/>
+	</head>
+	<body>
+		{{request.method}} Request Received
+		Parameters
+		<ul>
+			{% for parameter in keys(request.query) %}
+			<li> {{parameter}}: {{request.query[parameter]}} </li>
+			{% endfor %}
+		</ul>
+		Properties
+		<ul>
+			{% for property in keys(request.body) %}
+			<li> {{property}}: {{request.body[property]}} </li>
+			{% endfor %}
+		</ul>
+	</body>
+</html>
