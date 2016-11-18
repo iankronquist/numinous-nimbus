@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- The header should set the title and the character set -->
+		<title>CS290 How To Guide</title>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		{% if uploaded%}
+			<div>
+				Dropbox filename: uploaded.filename </br>
+				Imgur URL: uploaded.url </br>
+			</div>
+		{% endif %}
+		<form action='/imgur' method='POST'>
+			{% for match in matches %}
+				{% if match.match_type['.tag'] == 'filename' and match.metadata['.tag'] == 'file' %}
+					<input type="radio" id="radio" name='path' value='{{ match.metadata.name }}'> {{ match.metadata.name }} <br>
+				{% endif %}
+			{% endfor %}
+			<input type="submit">
+		</form>
+	</body>
+</html>
