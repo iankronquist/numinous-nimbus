@@ -1,6 +1,9 @@
 node_modules
 *.aux
 *.pdf
+*.ps
+*.dvi
+*.out
 *.log
 *.tar.gz
 *.zip
