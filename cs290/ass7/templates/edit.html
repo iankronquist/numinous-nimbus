@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CS290 Exercise Tracker</title>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<h2>Create new exercise </h2>
+		<h3 id='message'></h3>
+		<h4>You cannot edit the original date submitted because you can only do one exercise at a time!</h4>
+		<form id='update'>
+			Name: <br>
+			<input type='text' id='name' name='name' value='{{exercise.name}}'> <br>
+			Repetitions: <br>
+			<input type='number' id='reps' name='reps' value='{{exercise.reps}}'> <br>
+			Weight: <br>
+			<input type='number' id='weight' name='weight'value='{{exercise.weight}}'> <br>
+			Units: <br>
+			{% if exercise.lbs %}
+			<input type="radio" id="lbs" name='lbs' value='lbs' checked='true'>Pounds<br>
+			<input type="radio" id="kgs" name='lbs' value='kilos'>Kilograms<br>
+			{% else %}
+			<input type="radio" id="lbs" name='lbs' value='lbs'>Pounds<br>
+			<input type="radio" id="kgs" name='lbs' value='kilos'checked='true'>Kilograms<br>
+			{% endif %}
+			Date: <br>
+			<input type="number" name='date' readonly='true' value='{{exercise.date_submitted}}'> <br>
+			<input type="button" onclick='updateRequest({{exercise.date_submitted}})' value='Update'> <br>
+		</form>
+
+	</body>
+	<script>
+		function updateRequest(date_number) {
+			var req = new XMLHttpRequest();
+			req.open("POST", "/update", true);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.addEventListener('load', function() {
+				console.log(resp);
+				var resp = JSON.parse(req.responseText);
+				console.log(resp);
+				var message = 'Successfully updated';
+				if (req.status != 200) {
+					message = resp.error;
+				}
+				var messageElement = document.getElementById('message');
+				messageElement.innerHTML = message;
+			});
+			req.send(JSON.stringify({
+				date_submitted: date_number,
+				reps: parseInt(document.getElementById('reps').value) || 0,
+				weight: parseInt(document.getElementById('weight').value) || 0,
+				lbs: document.getElementById('lbs').checked
+			}));
+		}
+	</script>
+</html>

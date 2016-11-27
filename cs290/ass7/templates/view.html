@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CS290 Exercise Tracker</title>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<h2>Create new exercise </h2>
+		<h3 id='message'></h3>
+		<form id='create'>
+			Name: <br>
+			<input type='text' name='name'> <br>
+			Repetitions: <br>
+			<input type='number' name='reps'> <br>
+			Weight: <br>
+			<input type='number' name='weight'> <br>
+			Units: <br>
+			<input type="radio" id="radio" name='lbs' value='lbs' checked='true'>Pounds<br>
+			<input type="radio" id="radio" name='lbs' value='kilos'>Kilograms<br>
+			Date: <br>
+			<input type="number" name='date'> <br>
+			<input type="button" onclick='createRequest()' value='Create'> <br>
+		</form>
+
+		<table>
+			<tbody id='tb'>
+			<tr>
+				<th id='column_header'>Exercise name</th>
+				<th id='column_header'>Repetitions</th>
+				<th id='column_header'>Weights Used</th>
+				<th id='column_header'>In Pounds?</th>
+				<th id='column_header'>Date Submitted</th>
+			</tr>
+			{% for ex in exercises %}
+			<tr id='row_{{ex.date_submitted}}'>
+				<td>{{ex.name}}</td>
+				<td>{{ex.reps}}</td>
+				<td>{{ex.weight}}</td>
+				<td>{{ex.lbs}}</td>
+				<td>{{ex.date_submitted}}</td>
+				<td>
+					<form action='/edit' method='POST'>
+						<input type='hidden' name='date_submitted' value='{{ex.date_submitted}}'>
+						<input type='button' class='delete_button' value='Delete' onclick='deleteRequest({{ex.date_submitted}})'>
+						<input type='submit' class='edit_button' value='Edit'>
+					</form>
+				</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+
+	</body>
+	<script>
+		function deleteRequest(date_number) {
+			var req = new XMLHttpRequest();
+			req.open("POST", "/delete", true);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.addEventListener('load', function() {
+				console.log(resp);
+				var resp = JSON.parse(req.responseText);
+				console.log(resp);
+				document.getElementById('row_' + date_number).remove();
+			});
+			req.send(JSON.stringify({
+				date_submitted: date_number,
+			}));
+		}
+
+		function createRequest(date_number) {
+			var form = document.getElementById('create');
+			var req = new XMLHttpRequest();
+			console.log(form.elements);
+			console.log(form.elements[0].value);
+			var body = {
+				name: form.elements[0].value || 'unknown',
+				reps:  parseInt(form.elements[1].value) || 0,
+				weight: parseInt(form.elements[2].value) || 0,
+				lbs: form.elements[3].checked,
+				date_submitted: parseInt(form.elements[5].value) || Date.now(),
+			};
+			console.log(body)
+			req.open("POST", "/create", true);
+			req.setRequestHeader('Content-Type', 'application/json');
+			req.addEventListener('load', function() {
+				console.log(resp);
+				var resp = JSON.parse(req.responseText);
+				console.log(resp);
+				console.log(req);
+				var message = '';
+				if (req.status == 200) {
+					addExercise(body);
+				} else {
+					message = resp.error;
+				}
+				console.log(message);
+				var messageElement = document.getElementById('message');
+				messageElement.innerHTML = message;
+			});
+			req.send(JSON.stringify(body));
+		}
+
+		function addExercise(body) {
+			var tb = document.getElementById('tb');
+				var row = tb.insertRow();
+				row.id = 'row_'  + body.date_submitted;
+				var nameCell = row.insertCell(0);
+				nameCell.innerHTML = body.name;
+				var repsCell = row.insertCell(1);
+				repsCell.innerHTML = body.reps;
+				var weightCell = row.insertCell(2);
+				weightCell.innerHTML = body.weight;
+				var lbsCell = row.insertCell(3);
+				lbsCell.innerHTML = body.lbs;
+				var dateCell = row.insertCell(4);
+				dateCell.innerHTML = body.date_submitted;
+				var formCell = row.insertCell(5);
+				var form = document.createElement('form');
+
+				var hiddenInput = document.createElement('input');
+				hiddenInput.type = 'hidden';
+				hiddenInput.name = 'date_submitted';
+				hiddenInput.value = body.date_submitted;
+
+				var editButton = document.createElement('input');
+				editButton.type = 'submit';
+				editButton.value = 'Edit';
+				form.appendChild(editButton);
+				var deleteButton = document.createElement('input');
+				deleteButton.addEventListener('click', function() {
+					var ds = body.date_submitted;
+					deleteRequest(ds);
+				});
+				deleteButton.type = 'button';
+				deleteButton.value = 'Delete';
+				form.action = '/edit';
+				form.method = 'POST';
+				form.appendChild(deleteButton);
+				form.appendChild(editButton);
+				form.appendChild(hiddenInput);
+				formCell.appendChild(form);
+		}
+
+	</script>
+
+
+</html>
