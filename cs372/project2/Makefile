@@ -1,12 +1,12 @@
 CC := gcc
 CFLAGS :=  -O2 -Wall -Wextra -Werror -g -std=c99
+OBJS := ftpserv
 
-all: ftpserv
+all: $(OBJS)
 
 %: %.c
 	$(CC) $< -o $@ $(CFLAGS)
 
 clean:
-	rm -f chatclient
-	rm -f chatserv
+	rm -f $(OBJS)
 	rm -rf *dSYM
