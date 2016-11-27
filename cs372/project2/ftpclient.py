@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import StringIO
 import multiprocessing
 import os
@@ -8,12 +10,6 @@ import socket
 import struct
 import sys
 
-from multiprocessing.reduction import ForkingPickler
-
-def forking_dumps(obj):
-    buf = StringIO.StringIO()
-    ForkingPickler(buf).dump(obj)
-    return buf.getvalue()
 
 TCP_PROTOCOL = 6
 
@@ -27,6 +23,7 @@ class Status(object):
     im_a_teapot = 418
 
 
+# Defines how to pack the structs which will be sent over the control channel.
 control_request = 'iic'
 control_resp = 'ii'
 
@@ -44,16 +41,12 @@ def usage():
 
 
 def async_open_request(data_port, queue):
-    print('async started')
     data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, TCP_PROTOCOL)
     data_sock.bind(('0.0.0.0', data_port))
-    print('async bound')
     data_sock.listen(5)
-    print('waiting heard')
     queue.put('accepting')
     (clientsock, address) = data_sock.accept()
     (status_code, data_length) = queue.get()
-    print('put')
     if status_code == Status.ok:
         data = clientsock.recv(data_length)
         if command == '-l':
@@ -81,28 +74,19 @@ if __name__ == '__main__':
     queue = multiprocessing.Queue()
 
     proc = multiprocessing.Process(target=async_open_request, args=(data_port, queue))
-    print('running')
     proc.start()
-    print('ran')
 
     control_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM,
             TCP_PROTOCOL)
-    print('connecting')
     control_sock.connect((control_name, control_port))
-    print('connected')
     request = build_request(command, file_name, data_port)
     # ready signal
     queue.get()
     control_sock.send(request)
-    print('sent')
 
     resp = control_sock.recv(struct.calcsize(control_resp))
     (data_length, status_code) = struct.unpack(control_resp, resp)
     queue.put((data_length, status_code))
 
-    print('joining')
     proc.join()
-    print('joined')
-    print('gotten')
-
     control_sock.close()

@@ -40,7 +40,7 @@ struct control_response {
 } __attribute__((packed));
 
 int control_loop(int);
-int handle_request(int control, int client, struct sockaddr_in *cli_addr);
+int handle_request(int control, struct sockaddr_in *cli_addr);
 int transmit_file(char *filename, int data_sock, int control_sock);
 int transmit_listing(char *filename, int data_sock, int control_sock);
 
@@ -94,7 +94,6 @@ int control_loop(int port) {
     }
 
     while (true) {
-        printf("listen\n");
         err = listen(socketfd, 5);
         if (err != 0) {
             perror("Failed to listen on the socket");
@@ -102,17 +101,14 @@ int control_loop(int port) {
             return err;
         }
 
-        printf("accepting\n");
         clilen = sizeof(cli_addr);
         newsockfd = accept(socketfd, (struct sockaddr *)&cli_addr, &clilen);
         if (newsockfd == -1) {
             perror("Failed to accept connection");
             err = newsockfd;
-            printf("-- %d\n", err);
         }
-        printf("accepted\n");
 
-        err = handle_request(newsockfd, socketfd, &cli_addr);
+        err = handle_request(newsockfd, &cli_addr);
         if (err != 0) {
             break;
         }
@@ -123,23 +119,18 @@ int control_loop(int port) {
 
 // Handle a request from the client address. Opens and owns a data connection
 // with the client.
-int handle_request(int control, int client, struct sockaddr_in *cli_addr) {
+int handle_request(int control, struct sockaddr_in *cli_addr) {
     struct sockaddr_in data_addr;
     int data;
     int err;
     char *file_name = NULL;
     struct control_request message;
-    printf("handle request\n");
 
     err = read(control, &message, sizeof(struct control_request));
     if (err == -1) {
-        printf("Error reading from control socket\n");
+        fprintf(stderr, "Error reading from control socket\n");
         return err;
     }
-    printf("%zu %d\n", sizeof(message), err);
-    printf("%x", message.control_length);
-    printf("%x", message.data_port);
-    printf("%hx", message.type);
 
 
     data = socket(AF_INET, SOCK_STREAM, TCP_PROTOCOL);
@@ -151,15 +142,12 @@ int handle_request(int control, int client, struct sockaddr_in *cli_addr) {
     memcpy(&data_addr.sin_addr, &cli_addr->sin_addr, sizeof(data_addr.sin_addr));
     data_addr.sin_family = AF_INET;
     data_addr.sin_port = htons(message.data_port);
-    printf("connecting %x %x\n", ntohl(data_addr.sin_addr.s_addr), (message.control_length));
-    printf("connecting %x %x %x %x\n", htons(message.data_port), message.data_port, 8000, htons(8000));
     err = connect(data, (struct sockaddr *)&data_addr, sizeof(data_addr));
     if (err == -1) {
         perror("Couldn't connect to data socket");
         err = send_control_response(control, STATUS_SERVER_ERROR, 0);
         goto out;
     }
-    printf("connected\n");
 
     file_name = malloc(message.control_length + 1);
     if (file_name == NULL) {
@@ -169,26 +157,21 @@ int handle_request(int control, int client, struct sockaddr_in *cli_addr) {
     }
     file_name[message.control_length] = '\0';
 
-    printf("waiting for control req\n");
     if (read(control, file_name, message.control_length) == -1) {
         perror("Couldn't read from control socket");
         err = send_control_response(control, STATUS_SERVER_ERROR, 0);
         goto out;
     }
-    printf("got control req\n");
 
     if (message.type == 'g') {
-        printf("g branch\n");
         if (transmit_file(file_name, data, control) != 0) {
             err = send_control_response(control, STATUS_SERVER_ERROR, 0);
         }
     } else if (message.type == 'l') {
-        printf("l branch\n");
         if (transmit_listing(file_name, data, control) != 0) {
             err = send_control_response(control, STATUS_SERVER_ERROR, 0);
         }
     } else {
-        printf("nope branch\n");
         err = send_control_response(control, STATUS_INVALID_REQUEST, 0);
     }
 
