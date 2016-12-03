@@ -127,6 +127,105 @@ describe('endpoint /create', () => {
     );
   });
 
+  it('should not create an exercise if a bad token given', (done) => {
+    request_endpoint('/create',
+      {'username': 'test', 'auth_token': 'abcd', 'weight': 10, 'time': 20},
+      (err, resp, body) => {
+        assert(!err);
+        assert(resp.statusCode == 501);
+        done();
+      }
+    );
+  });
+
+
+  after((done) => {
+    redisClient.hdel('users', 'test', 'test2', done);
+  });
+});
+
+describe('endpoint /list', () => {
+
+  before((done) => {
+    redisClient.hdel('users', 'test', 'test2', () => {
+      redisClient.del('exercise_id_ctr', () => {
+        redisClient.del('test:exercises', () => {
+          request_endpoint('/signup',
+            {'username': 'test', 'password': 'test'},
+            (err, resp, body) => {
+              assert(!err);
+              assert(resp.statusCode == 200);
+              this.auth_token = body.key;
+              request_endpoint('/create',
+                {
+                  'username': 'test',
+                  'auth_token': this.auth_token,
+                  'weight': 1,
+                  'time': 2
+                },
+                (err, resp, body) => {
+                  assert(!err);
+                  assert(resp.statusCode == 200);
+                  request_endpoint('/create',
+                    {
+                      'username': 'test',
+                      'auth_token': this.auth_token,
+                      'weight': 2,
+                      'time': 4
+                    },
+                    (err, resp, body) => {
+                      assert(!err);
+                      assert(resp.statusCode == 200);
+                      request_endpoint('/create',
+                        {
+                          'username': 'test',
+                          'auth_token': this.auth_token,
+                          'weight': 4,
+                          'time': 6
+                        },
+                        (err, resp, body) => {
+                          assert(!err);
+                          assert(resp.statusCode == 200);
+                          done();
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+        });
+      });
+    });
+  });
+
+  it('should list exercises', (done) => {
+    request_endpoint('/list',
+      {'username': 'test', 'auth_token': this.auth_token},
+      (err, resp, body) => {
+        assert(!err);
+        assert(resp.statusCode === 200);
+        assert(body['items'][1] === '{"time":2,"weight":1}');
+        assert(body['items'][2] === '{"time":4,"weight":2}');
+        assert(body['items'][3] === '{"time":6,"weight":4}');
+        done();
+      }
+    );
+  });
+
+  it('should not create an exercise if a bad token given', (done) => {
+    request_endpoint('/list',
+      {'username': 'test', 'auth_token': 'abcd'},
+      (err, resp, body) => {
+        assert(!err);
+        assert(resp.statusCode == 501);
+        done();
+      }
+    );
+  });
+
+
   after((done) => {
     redisClient.hdel('users', 'test', 'test2', done);
   });

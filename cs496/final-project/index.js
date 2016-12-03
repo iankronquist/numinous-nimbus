@@ -61,10 +61,17 @@ function generate_auth_token() {
   return crypto.randomBytes(32).toString('hex');
 }
 
+function exercises_key(username) {
+  return username + ':exercises';
+}
+
 function authorize_user(username, supplied_token, cb) {
   redisClient.hget('logins',
     username,
-    (auth_token) => {
+    (err, auth_token) => {
+      if (err) {
+        cb(false);
+      }
       cb(auth_token === supplied_token);
     }
   );
@@ -92,28 +99,62 @@ app.post('/create', function(req, res) {
     return res.json(err);
   }
 
-  generate_unique_exercise_id((err, id) => {
-    if (err != null) {
-      res.statusCode = 500
-      return res.json(message_builder('database error', res.statusCode));
+  authorize_user(req.body['username'], req.body['auth_token'], (success) => {
+    if (!success) {
+      res.statusCode = 501;
+      return res.json(error_builder('bad token', res.statusCode));
     }
-    var member = {
-      time: req.body['time'],
-      exercises: req.body['exercises']
-    };
-    redisClient.hset(req.body['username'] + ':exercises',
-      id,
-      JSON.stringify(member),
-      (err, resp) => {
-        if (err) {
-          res.statusCode = 500;
-          return res.json(error_builder('database error', res.statusCode));
-        } else {
-          return res.json(message_builder('successfully added', 200));
-        }
-      });
+    generate_unique_exercise_id((err, id) => {
+      if (err != null) {
+        res.statusCode = 500
+        return res.json(message_builder('database error', res.statusCode));
+      }
+      var member = {
+        time: req.body['time'],
+        weight: req.body['weight']
+      };
+      redisClient.hset(exercises_key(req.body['username']),
+        id,
+        JSON.stringify(member),
+        (err, resp) => {
+          if (err) {
+            res.statusCode = 500;
+            return res.json(error_builder('database error', res.statusCode));
+          } else {
+            return res.json(message_builder('successfully added', 200));
+          }
+        });
+    });
   });
 });
+
+app.post('/list', function(req, res) {
+  var err = validate_params(req.body, true);
+  if (err != null) {
+    res.statusCode = err.status;
+    return res.json(err);
+  }
+
+  authorize_user(req.body['username'], req.body['auth_token'], (success) => {
+    if (!success) {
+      res.statusCode = 501;
+      return res.json(error_builder('bad token', res.statusCode));
+    }
+    redisClient.hgetall(exercises_key(req.body['username']), (err, keyvals) => {
+      if (err || (keyvals.length % 2)) {
+        res.statusCode = 500;
+        return res.json(error_builder('database error', res.statusCode));
+      }
+      var ht = {
+        items: keyvals,
+        status: 200,
+        message: 'successfully retrieved keys',
+      };
+      res.json(ht);
+    });
+  });
+});
+
 
 
 app.post('/login', function(req, res) {
