@@ -135,7 +135,8 @@ app.post('/update', function(req, res) {
         }
         var member = {
           time: req.body['time'] || jobj['time'],
-          weight: req.body['weight'] || jobj['time'],
+          weight: req.body['weight'] || jobj['weight'],
+          location: req.body['location'] || jobj['location'],
         };
         redisClient.hset(exercises_key(req.body['username']),
           req.body['id'],
@@ -172,6 +173,11 @@ app.post('/create', function(req, res) {
     return res.json(err);
   }
 
+  if(req.body['location'] && typeof(req.body['location']) === 'string') {
+    res.statusCode = 400;
+    return res.json(message_builder('location must be a string', res.statusCode));
+  }
+
   authorize_user(req.body['username'], req.body['auth_token'], (success) => {
     if (!success) {
       res.statusCode = 501;
@@ -184,7 +190,8 @@ app.post('/create', function(req, res) {
       }
       var member = {
         time: req.body['time'],
-        weight: req.body['weight']
+        weight: req.body['weight'],
+        location: req.body['location'] || undefined,
       };
       redisClient.hset(exercises_key(req.body['username']),
         id,
