@@ -145,6 +145,83 @@ describe('endpoint /create', () => {
   });
 });
 
+
+describe('endpoint /update', () => {
+
+  var auth_token;
+
+  before((done) => {
+    redisClient.hdel('users', 'test', 'test2', () => {
+      request_endpoint('/signup',
+        {'username': 'test', 'password': 'test'},
+        (err, resp, body) => {
+          assert(!err);
+          assert(resp.statusCode == 200);
+          this.auth_token = body.key;
+          request_endpoint('/create',
+            {
+              'username': 'test',
+              'auth_token': this.auth_token,
+              'weight': 10,
+              'time': 20
+            },
+            (err, resp, body) => {
+              assert(!err);
+              assert(resp.statusCode == 200);
+              assert(body.id);
+              this.id = body.id;
+              done();
+            }
+          );
+        }
+      );
+    });
+  });
+
+  it('should update an exercise', (done) => {
+    request_endpoint('/update',
+      {
+        'username': 'test',
+        'auth_token': this.auth_token,
+        'id': this.id,
+        'weight': 20,
+        'time': 30
+      },
+      (err, resp, body) => {
+        assert(!err);
+        assert(resp.statusCode == 200);
+        request_endpoint('/list',
+          {'username': 'test', 'auth_token': this.auth_token},
+          (err, resp, body) => {
+            assert(!err);
+            assert(resp.statusCode === 200);
+            assert(body['items'][this.id] === '{"time":30,"weight":20}');
+            done();
+          }
+        );
+      }
+    );
+  });
+
+  it('should not update an exercise if a bad token given', (done) => {
+    request_endpoint('/update',
+      {'username': 'test', 'auth_token': 'abcd', 'id': 0, 'weight': 10, 'time': 20},
+      (err, resp, body) => {
+        assert(!err);
+        assert(resp.statusCode == 501);
+        done();
+      }
+    );
+  });
+
+
+  after((done) => {
+    redisClient.hdel('users', 'test', 'test2', done);
+  });
+});
+
+
+
 describe('endpoint /list', () => {
 
   before((done) => {
@@ -257,7 +334,7 @@ describe('endpoint /delete', () => {
 
                 this.id = body.id;
                 done();
-            });
+              });
           }
         );
       });
