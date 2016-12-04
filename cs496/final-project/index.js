@@ -20,8 +20,8 @@ function error_builder(message, code) {
   return {'error': message, 'status': code };
 }
 
-function message_builder(message, code, key) {
-  return {'message': message, 'key': key, 'status': code };
+function message_builder(message, code, key, id) {
+  return {'message': message, 'key': key, 'status': code, 'id': id};
 }
 
 function validate_params(body, login_required) {
@@ -121,7 +121,10 @@ app.post('/create', function(req, res) {
             res.statusCode = 500;
             return res.json(error_builder('database error', res.statusCode));
           } else {
-            return res.json(message_builder('successfully added', 200));
+            return res.json(message_builder('successfully added',
+              200,
+              undefined,
+              id));
           }
         });
     });

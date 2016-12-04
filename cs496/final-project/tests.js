@@ -122,6 +122,7 @@ describe('endpoint /create', () => {
       (err, resp, body) => {
         assert(!err);
         assert(resp.statusCode == 200);
+        assert(body.id);
         done();
       }
     );
