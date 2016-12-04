@@ -215,7 +215,7 @@ describe('endpoint /list', () => {
     );
   });
 
-  it('should not create an exercise if a bad token given', (done) => {
+  it('should not list exercises if a bad token given', (done) => {
     request_endpoint('/list',
       {'username': 'test', 'auth_token': 'abcd'},
       (err, resp, body) => {
@@ -243,9 +243,21 @@ describe('endpoint /delete', () => {
           (err, resp, body) => {
             assert(!err);
             assert(resp.statusCode == 200);
-            this.auth_token = body.auth_token;
-            this.id = body.id;
-            done();
+            this.auth_token = body.key;
+            request_endpoint('/create',
+              {
+                'username': 'test',
+                'auth_token': this.auth_token,
+                'weight': 1,
+                'time': 2
+              },
+              (err, resp, body) => {
+                assert(!err);
+                assert(resp.statusCode == 200);
+
+                this.id = body.id;
+                done();
+            });
           }
         );
       });
@@ -258,6 +270,7 @@ describe('endpoint /delete', () => {
       (err, resp, body) => {
         assert(!err);
         assert(resp.statusCode == 200);
+
         request_endpoint('/list',
           {
             'username': 'test',
@@ -266,7 +279,7 @@ describe('endpoint /delete', () => {
           (err, resp, body) => {
             assert(!err);
             assert(resp.statusCode == 200);
-            assert(body.items.length == 0);
+            assert(!body.items);
           }
         );
         done();
@@ -274,9 +287,15 @@ describe('endpoint /delete', () => {
     );
   });
 
-  it('should not create an exercise if a bad token given', (done) => {
-    request_endpoint('/create',
-      {'username': 'test', 'auth_token': 'abcd', 'weight': 10, 'time': 20},
+  it('should not delete an exercise if a bad token given', (done) => {
+    request_endpoint('/delete',
+      {
+        'username': 'test',
+        'id': 0,
+        'auth_token': 'abcd',
+        'weight': 10,
+        'time': 20
+      },
       (err, resp, body) => {
         assert(!err);
         assert(resp.statusCode == 501);

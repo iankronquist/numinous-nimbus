@@ -144,7 +144,7 @@ app.post('/list', function(req, res) {
       return res.json(error_builder('bad token', res.statusCode));
     }
     redisClient.hgetall(exercises_key(req.body['username']), (err, keyvals) => {
-      if (err || (keyvals.length % 2)) {
+      if (err) {
         res.statusCode = 500;
         return res.json(error_builder('database error', res.statusCode));
       }
@@ -154,6 +154,45 @@ app.post('/list', function(req, res) {
         message: 'successfully retrieved keys',
       };
       res.json(ht);
+    });
+  });
+});
+
+app.post('/delete', function(req, res) {
+  console.log(req.body);
+  var err = validate_params(req.body, true);
+  if (err != null) {
+    res.statusCode = err.status;
+    return res.json(err);
+  }
+
+  console.log(req.body['id']);
+  if (req.body['id'] === undefined ||
+      req.body['id'] === null ||
+      typeof(req.body['id']) != 'number') {
+    res.statusCode = 400
+    return res.json(message_builder('id must be present and a number',
+      res.statusCode));
+  }
+
+  authorize_user(req.body['username'], req.body['auth_token'], (success) => {
+    if (!success) {
+      res.statusCode = 501;
+      return res.json(error_builder('bad token', res.statusCode));
+    }
+    redisClient.hdel(exercises_key(req.body['username']),
+      req.body['id'],
+      (err, keyvals) => {
+        if (err) {
+          res.statusCode = 500;
+          return res.json(error_builder('database error', res.statusCode));
+        }
+        var ht = {
+          items: keyvals,
+          status: 200,
+          message: 'successfully retrieved keys',
+        };
+        res.json(ht);
     });
   });
 });
