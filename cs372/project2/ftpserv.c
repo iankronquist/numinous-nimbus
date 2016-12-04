@@ -133,6 +133,9 @@ int handle_request(int control, struct sockaddr_in *cli_addr) {
     }
 
 
+	printf("-1\n");
+	sleep(1);
+	printf("0\n");
     data = socket(AF_INET, SOCK_STREAM, TCP_PROTOCOL);
     if (data < 0) {
         perror("Couldn't open data socket");
@@ -142,7 +145,9 @@ int handle_request(int control, struct sockaddr_in *cli_addr) {
     memcpy(&data_addr.sin_addr, &cli_addr->sin_addr, sizeof(data_addr.sin_addr));
     data_addr.sin_family = AF_INET;
     data_addr.sin_port = htons(message.data_port);
+	printf("1\n");
     err = connect(data, (struct sockaddr *)&data_addr, sizeof(data_addr));
+	printf("2\n");
     if (err == -1) {
         perror("Couldn't connect to data socket");
         err = send_control_response(control, STATUS_SERVER_ERROR, 0);

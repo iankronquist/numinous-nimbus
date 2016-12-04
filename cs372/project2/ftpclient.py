@@ -41,12 +41,19 @@ def usage():
 
 
 def async_open_request(data_port, queue):
+    print('socket')
     data_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, TCP_PROTOCOL)
+    print('bind')
     data_sock.bind(('0.0.0.0', data_port))
+    print('listen')
     data_sock.listen(5)
+    print('put')
     queue.put('accepting')
+    print('accept')
     (clientsock, address) = data_sock.accept()
+    print('get')
     (status_code, data_length) = queue.get()
+    print('stat')
     if status_code == Status.ok:
         data = clientsock.recv(data_length)
         if command == '-l':
@@ -78,7 +85,7 @@ if __name__ == '__main__':
 
     control_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM,
             TCP_PROTOCOL)
-    control_sock.connect((control_name, control_port))
+    control_sock.connect((socket.gethostbyname(control_name), control_port))
     request = build_request(command, file_name, data_port)
     # ready signal
     queue.get()

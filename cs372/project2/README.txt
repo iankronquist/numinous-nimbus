@@ -37,13 +37,17 @@ In one terminal:
 ./ftpserv 8888
 
 Then, in another on the same host:
-./ftpclient.py  localhost 8889 -g ../ass2.tex 8000
+./ftpclient.py  localhost 8888 -g ../ass2.tex 8000
 
 Alternately, to connect to the flip server:
 ./ftpclient.py  access.engr.oregonstate.edu 8888 -g ../ass2.tex 8000
 
 ## Resources Used
 I consulted some old code I had from CS 411 which had a very similar
-assignment. I also consulted the man pages, pydoc, and the Python sockets
-tutorial.
+assignment as well as the previous project. I also consulted the man pages,
+pydoc, and the Python sockets tutorial and the python documentation for the
+struct library. 
 https://docs.python.org/2/howto/sockets.html
+https://docs.python.org/2/library/struct.html
+I consulted Beej's guide to get the definition of `struct sockaddr_in`
+http://beej.us/guide/bgnet/output/html/multipage/sockaddr_inman.html
