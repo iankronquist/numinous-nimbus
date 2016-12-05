@@ -276,10 +276,14 @@ app.post('/list', function(req, res) {
         return res.json(error_builder('database error', res.statusCode));
       }
       var ht = {
-        items: keyvals,
+        items: {},
         status: 200,
         message: 'successfully retrieved keys',
       };
+
+      for (var key in keyvals) {
+        ht.items[key] = JSON.parse(keyvals[key]);
+      }
       res.json(ht);
     });
   });
