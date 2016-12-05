@@ -173,7 +173,7 @@ app.post('/create', function(req, res) {
     return res.json(err);
   }
 
-  if(req.body['location'] && typeof(req.body['location']) === 'string') {
+  if(req.body['location'] && typeof(req.body['location']) !== 'string') {
     res.statusCode = 400;
     return res.json(message_builder('location must be a string', res.statusCode));
   }
